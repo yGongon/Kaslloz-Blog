@@ -34,8 +34,12 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
     try {
         await signInWithGoogle();
         onClose();
-    } catch (err) {
-        setError('Falha ao fazer login com o Google. Tente novamente.');
+    } catch (err: any) {
+        if (err.code === 'auth/unauthorized-domain') {
+          setError('Este domínio não está autorizado para login. O administrador do site precisa adicionar este domínio à lista de domínios autorizados no Firebase.');
+        } else {
+          setError('Falha ao fazer login com o Google. Tente novamente.');
+        }
         console.error(err);
     } finally {
         setIsSubmitting(false);

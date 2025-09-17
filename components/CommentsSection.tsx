@@ -2,16 +2,19 @@ import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useComments } from '../contexts/CommentsContext';
+import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase/config';
 import { ref, query, orderByChild, equalTo, onValue } from 'firebase/database';
 import { Comment } from '../types';
+import { Icon } from './Icon';
 
 interface CommentsSectionProps {
   postId: string;
 }
 
 const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
-  const { addComment } = useComments();
+  const { addComment, deleteComment } = useComments();
+  const { isLoggedIn } = useAuth();
   const [name, setName] = useState('');
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
@@ -80,6 +83,15 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
     }
   };
 
+  const handleDeleteComment = async (commentId: string) => {
+    if (window.confirm('Você tem certeza que deseja deletar este comentário? Esta ação não pode ser desfeita.')) {
+      const success = await deleteComment(commentId);
+      if (!success) {
+        alert('Falha ao deletar o comentário.');
+      }
+    }
+  };
+
   return (
     <div className="mt-12">
       <h2 className="font-display text-2xl sm:text-3xl font-bold text-white mb-6 border-b-2 border-brand-red/30 pb-2">Comentários ({comments.length})</h2>
@@ -133,9 +145,20 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
         ) : comments.length > 0 ? (
           comments.map((c) => (
             <div key={c.id} className="bg-brand-gray p-4 rounded-lg border border-brand-light-gray/20">
-              <div className="flex justify-between items-center mb-2">
-                <p className="font-bold text-white">{c.name}</p>
-                <p className="text-xs text-gray-500">{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(c.createdAt))}</p>
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="font-bold text-white">{c.name}</p>
+                  <p className="text-xs text-gray-500">{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(c.createdAt))}</p>
+                </div>
+                {isLoggedIn && (
+                  <button
+                    onClick={() => handleDeleteComment(c.id)}
+                    className="text-gray-500 hover:text-brand-red transition-colors duration-200"
+                    aria-label="Deletar comentário"
+                  >
+                    <Icon name="trash" className="w-5 h-5" />
+                  </button>
+                )}
               </div>
               <div className="prose prose-invert prose-sm max-w-none text-gray-300">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>

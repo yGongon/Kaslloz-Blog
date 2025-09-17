@@ -1,11 +1,12 @@
 import React from 'react';
-import { createContext, useContext, ReactNode, useCallback } from 'react';
+import { createContext, useContext, ReactNode, useCallback, useMemo } from 'react';
 import { Comment } from '../types';
 import { db } from '../firebase/config';
-import { ref, push, set, serverTimestamp } from 'firebase/database';
+import { ref, push, set, serverTimestamp, remove } from 'firebase/database';
 
 interface CommentsContextType {
   addComment: (comment: Omit<Comment, 'id' | 'createdAt'>) => Promise<void>;
+  deleteComment: (id: string) => Promise<boolean>;
 }
 
 const CommentsContext = createContext<CommentsContextType | undefined>(undefined);
@@ -26,8 +27,21 @@ export const CommentsProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }, []);
 
+  const deleteComment = useCallback(async (id: string): Promise<boolean> => {
+    try {
+      await remove(ref(db, `comments/${id}`));
+      return true;
+    } catch (error) {
+      console.error("Error deleting comment: ", error);
+      return false;
+    }
+  }, []);
+  
+  const value = useMemo(() => ({ addComment, deleteComment }), [addComment, deleteComment]);
+
+
   return (
-    <CommentsContext.Provider value={{ addComment }}>
+    <CommentsContext.Provider value={value}>
       {children}
     </CommentsContext.Provider>
   );

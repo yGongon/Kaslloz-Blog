@@ -11,6 +11,8 @@ const BuildsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<WeaponType | 'all'>('all');
+  const [sortBy, setSortBy] = useState<'createdAt' | 'votes'>('createdAt');
+
 
   const tagFromUrl = searchParams.get('tag');
 
@@ -22,20 +24,25 @@ const BuildsPage: React.FC = () => {
         return p.weaponType === selectedType;
       })
       .filter(p => {
-        // Filtro por tag da URL
         if (tagFromUrl && (!p.tags || !p.tags.some(t => t.toLowerCase() === tagFromUrl.toLowerCase()))) {
             return false;
         }
-
-        // Filtro por termo de busca
         const lowerCaseSearch = searchTerm.toLowerCase();
         if (!lowerCaseSearch) return true;
 
         return p.title.toLowerCase().includes(lowerCaseSearch) ||
         p.content.toLowerCase().includes(lowerCaseSearch) ||
         (p.tags && p.tags.some(tag => tag.toLowerCase().includes(lowerCaseSearch)));
+      })
+      .sort((a, b) => {
+          if(sortBy === 'votes') {
+            const scoreA = (a.upvotes || 0) - (a.downvotes || 0);
+            const scoreB = (b.upvotes || 0) - (b.downvotes || 0);
+            return scoreB - scoreA;
+          }
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
-  }, [posts, searchTerm, selectedType, tagFromUrl]);
+  }, [posts, searchTerm, selectedType, tagFromUrl, sortBy]);
 
   return (
     <PageTransition>
@@ -48,8 +55,16 @@ const BuildsPage: React.FC = () => {
           <div className="flex-grow">
             <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} placeholder="Buscar por arma, build ou tag..." />
           </div>
-          <div className="md:w-auto">
-              <label htmlFor="weaponTypeFilter" className="sr-only">Filtrar por tipo de arma</label>
+          <div className="flex gap-4">
+              <select 
+                  id="sortBy"
+                  value={sortBy} 
+                  onChange={e => setSortBy(e.target.value as 'createdAt' | 'votes')}
+                  className="w-full h-full bg-brand-gray border-2 border-brand-light-gray/30 rounded-full py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent transition-all"
+              >
+                  <option value="createdAt">Mais Recentes</option>
+                  <option value="votes">Mais Votados</option>
+              </select>
               <select 
                   id="weaponTypeFilter"
                   value={selectedType} 

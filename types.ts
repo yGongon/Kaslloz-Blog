@@ -1,6 +1,7 @@
 export enum Category {
   Builds = 'Builds',
   PatchNotes = 'Notas de Patch',
+  OperatorGuides = 'Guias',
 }
 
 export enum WeaponType {
@@ -23,6 +24,8 @@ export interface Post {
   version?: string;
   weaponType?: WeaponType;
   tags?: string[];
+  upvotes: number;
+  downvotes: number;
 }
 
 export interface Page {
@@ -36,9 +39,9 @@ export interface Page {
 export interface Comment {
   id: string;
   postId: string;
-  userId: string; // Firebase Auth UID, or 'guest'
-  name: string; // User's display name or guest name
-  photoURL?: string; // User's photo URL
+  userId: string; 
+  name: string;
+  photoURL?: string;
   comment: string;
   createdAt: string;
 }

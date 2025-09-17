@@ -12,6 +12,8 @@ export const INITIAL_POSTS: Post[] = [
     createdAt: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
     weaponType: WeaponType.AssaultRifle,
     tags: ['M4A1', 'Baixo Recuo', 'Longo Alcance'],
+    upvotes: 0,
+    downvotes: 0,
   },
   {
     id: '2',
@@ -22,6 +24,8 @@ export const INITIAL_POSTS: Post[] = [
     createdAt: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
     version: '1.2.5',
     tags: ['Spectre', 'Redacted', 'Balanceamento'],
+    upvotes: 0,
+    downvotes: 0,
   },
    {
     id: '3',
@@ -33,9 +37,22 @@ export const INITIAL_POSTS: Post[] = [
     createdAt: new Date(new Date().setDate(new Date().getDate() - 3)).toISOString(),
     weaponType: WeaponType.SMG,
     tags: ['AK-74u', 'Mobilidade', 'Agressivo'],
+    upvotes: 0,
+    downvotes: 0,
   },
   {
     id: '4',
+    title: 'Guia Completo do Operador "Ghost"',
+    category: Category.OperatorGuides,
+    content: 'Este guia detalha tudo sobre o Operador "Ghost", incluindo suas habilidades passivas e ativas, melhores sinergias de loadout e estratégias de mapa para maximizar sua eficácia. Aprenda a se mover sem ser detectado e a usar seu pulso de PEM para desabilitar o equipamento inimigo.\n\n**Habilidades:**\n- Passiva: Passos Silenciosos - Seus passos são 50% mais silenciosos que o normal.\n- Ativa: Pulso de PEM - Libera uma onda de energia que desativa temporariamente os dispositivos eletrônicos inimigos em um raio de 15 metros.\n\n**Dicas de Jogabilidade:**\n- Use o Pulso de PEM antes de invadir uma sala para desarmar armadilhas.\n- Combine com uma arma suprimida para o flanco perfeito.',
+    imageUrl: 'https://picsum.photos/seed/ghostguide/800/450',
+    createdAt: new Date(new Date().setDate(new Date().getDate() - 4)).toISOString(),
+    tags: ['Ghost', 'Guia', 'Furtividade'],
+    upvotes: 0,
+    downvotes: 0,
+  },
+  {
+    id: '5',
     title: 'Notas de Patch v1.2.4 - Melhorias de Qualidade de Vida',
     category: Category.PatchNotes,
     content: 'Um patch menor focado em melhorar a experiência do jogador.\n\n**UI/UX:**\n- Adicionado um botão "Jogar Novamente" na tela pós-partida.\n- Melhorada a clareza das descrições dos acessórios.\n\n**Áudio:**\n- O áudio dos passos foi ajustado para ser mais direcional.\n\n**Desempenho:**\n- Melhorias gerais de desempenho em PCs de entrada.',
@@ -43,6 +60,8 @@ export const INITIAL_POSTS: Post[] = [
     createdAt: new Date(new Date().setDate(new Date().getDate() - 5)).toISOString(),
     version: '1.2.4',
     tags: ['UI', 'Áudio', 'Desempenho'],
+    upvotes: 0,
+    downvotes: 0,
   },
 ];
 

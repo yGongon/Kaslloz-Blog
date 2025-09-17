@@ -121,6 +121,7 @@ const Header: React.FC = () => {
               <NavLink to="/" className={navLinkClass}>Início</NavLink>
               <NavLink to="/builds" className={navLinkClass}>Builds</NavLink>
               <NavLink to="/patch-notes" className={navLinkClass}>Notas de Patch</NavLink>
+              <NavLink to="/guias" className={navLinkClass}>Guias</NavLink>
               {pages.map(page => (
                 <NavLink key={page.id} to={`/page/${page.slug}`} className={navLinkClass}>{page.title}</NavLink>
               ))}
@@ -140,6 +141,7 @@ const Header: React.FC = () => {
                     <NavLink to="/" className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>Início</NavLink>
                     <NavLink to="/builds" className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>Builds</NavLink>
                     <NavLink to="/patch-notes" className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>Notas de Patch</NavLink>
+                    <NavLink to="/guias" className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>Guias</NavLink>
                     {pages.map(page => (
                       <NavLink key={page.id} to={`/page/${page.slug}`} className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>{page.title}</NavLink>
                     ))}

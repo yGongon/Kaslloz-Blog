@@ -10,6 +10,7 @@ import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import BuildsPage from './pages/BuildsPage';
 import PatchNotesPage from './pages/PatchNotesPage';
+import OperatorGuidesPage from './pages/OperatorGuidesPage';
 import PostDetailPage from './pages/PostDetailPage';
 import GenericPage from './pages/GenericPage';
 import { AnimatePresence } from 'framer-motion';
@@ -23,6 +24,7 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/builds" element={<BuildsPage />} />
         <Route path="/patch-notes" element={<PatchNotesPage />} />
+        <Route path="/guias" element={<OperatorGuidesPage />} />
         <Route path="/page/:slug" element={<GenericPage />} />
         <Route path="/post/:id" element={<PostDetailPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />

@@ -10,12 +10,12 @@ import { Icon } from './Icon';
 
 interface CommentsSectionProps {
   postId: string;
+  onLoginRequest: () => void;
 }
 
-const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
+const CommentsSection: React.FC<CommentsSectionProps> = ({ postId, onLoginRequest }) => {
   const { addComment, deleteComment } = useComments();
   const { user, isLoggedIn, isAdmin } = useAuth();
-  const [name, setName] = useState('');
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
@@ -61,30 +61,26 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!comment.trim() || (!isLoggedIn && !name.trim())) {
-      setError('Nome e comentário são obrigatórios.');
+    if (!isLoggedIn || !user) {
+      setError('Você precisa estar logado para comentar.');
+      return;
+    }
+    if (!comment.trim()) {
+      setError('O comentário não pode estar vazio.');
       return;
     }
     setError('');
     setIsSubmitting(true);
     try {
-      const commentData = isLoggedIn && user 
-        ? {
-            postId,
-            userId: user.uid,
-            name: user.displayName || 'Usuário Anônimo',
-            photoURL: user.photoURL || undefined,
-            comment,
-          }
-        : {
-            postId,
-            userId: 'guest',
-            name,
-            comment,
-          };
+      const commentData = {
+        postId,
+        userId: user.uid,
+        name: user.displayName || 'Usuário Anônimo',
+        photoURL: user.photoURL || undefined,
+        comment,
+      };
 
       await addComment(commentData);
-      setName('');
       setComment('');
     } catch (err) {
       setError('Ocorreu um erro ao enviar seu comentário. Tente novamente.');
@@ -108,55 +104,53 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
       <h2 className="font-display text-2xl sm:text-3xl font-bold text-white mb-6 border-b-2 border-brand-red/30 pb-2">Comentários ({comments.length})</h2>
       
       <div className="bg-brand-gray p-6 rounded-lg border border-brand-light-gray/30 mb-8">
-        <h3 className="font-display text-xl font-bold text-white mb-4">Deixe um comentário</h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {isLoggedIn && user ? (
-            <div className="flex items-center space-x-3 p-2 bg-brand-dark rounded-md">
-                <img src={user.photoURL || ''} alt={user.displayName || 'User'} className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" />
-                <p className="text-white font-semibold">Comentando como {user.displayName}</p>
-            </div>
-          ) : (
-             <div>
-                <label htmlFor="name" className="block text-gray-400 text-sm font-bold mb-2">Seu Nome</label>
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+        {isLoggedIn && user ? (
+          <>
+            <h3 className="font-display text-xl font-bold text-white mb-4">Deixe um comentário</h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="flex items-center space-x-3 p-2 bg-brand-dark rounded-md">
+                  <img src={user.photoURL || ''} alt={user.displayName || 'User'} className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" />
+                  <p className="text-white font-semibold">Comentando como {user.displayName}</p>
+              </div>
+              <div>
+                <label htmlFor="comment" className="sr-only">Comentário</label>
+                <textarea
+                  id="comment"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  rows={4}
                   className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red"
                   required
                   disabled={isSubmitting}
+                  placeholder={`O que você acha, ${user?.displayName?.split(' ')[0]}?`}
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Você pode usar <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Markdown</a> para formatação.
+                </p>
               </div>
-          )}
-         
-          <div>
-            <label htmlFor="comment" className="block text-gray-400 text-sm font-bold mb-2">Comentário</label>
-            <textarea
-              id="comment"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              rows={4}
-              className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red"
-              required
-              disabled={isSubmitting}
-              placeholder={isLoggedIn ? `O que você acha, ${user?.displayName?.split(' ')[0]}?` : 'Escreva seu comentário...'}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Você pode usar <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Markdown</a> para formatação.
-            </p>
-          </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <div className="text-right">
+              {error && <p className="text-red-500 text-sm">{error}</p>}
+              <div className="text-right">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-brand-red hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline uppercase transition-colors duration-300 disabled:bg-red-900 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Enviando...' : 'Enviar Comentário'}
+                </button>
+              </div>
+            </form>
+          </>
+        ) : (
+          <div className="text-center">
+            <p className="text-gray-300 mb-4">Você precisa fazer login para deixar um comentário.</p>
             <button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-brand-red hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline uppercase transition-colors duration-300 disabled:bg-red-900 disabled:cursor-not-allowed"
+              onClick={onLoginRequest}
+              className="bg-brand-red hover:bg-red-700 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline uppercase transition-colors duration-300"
             >
-              {isSubmitting ? 'Enviando...' : 'Enviar Comentário'}
+              Login / Criar Conta
             </button>
           </div>
-        </form>
+        )}
       </div>
 
       <div className="space-y-6">
@@ -178,7 +172,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
                       <p className="font-bold text-white">{c.name}</p>
                       <p className="text-xs text-gray-500">{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(c.createdAt))}</p>
                     </div>
-                    {isAdmin && (
+                    {(isAdmin || (user && user.uid === c.userId)) && ( // Allow user to delete their own comment
                       <button
                         onClick={() => handleDeleteComment(c.id)}
                         className="text-gray-500 hover:text-brand-red transition-colors duration-200"

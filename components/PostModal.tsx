@@ -73,8 +73,14 @@ const PostModal: React.FC<PostModalProps> = ({ postToEdit, onClose }) => {
         weaponType: category === Category.Builds ? weaponType : undefined,
         tags: tagsArray,
     };
+
     if (postToEdit) {
-      updatePost({ ...postToEdit, ...postData });
+      // Retain original vote counts when updating
+      const fullPostData = {
+          ...postToEdit,
+          ...postData
+      };
+      updatePost(fullPostData);
     } else {
       addPost(postData);
     }
@@ -109,6 +115,7 @@ const PostModal: React.FC<PostModalProps> = ({ postToEdit, onClose }) => {
             <select value={category} onChange={(e) => setCategory(e.target.value as Category)} className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red">
               <option value={Category.Builds}>Builds</option>
               <option value={Category.PatchNotes}>Notas de Patch</option>
+              <option value={Category.OperatorGuides}>Guias</option>
             </select>
           </div>
            <div>

@@ -35,13 +35,25 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
         await signInWithGoogle();
         onClose();
     } catch (err: any) {
-        if (err.code === 'auth/unauthorized-domain') {
-          const currentHost = window.location.hostname;
-          setError(`Erro: Domínio não autorizado. Adicione EXATAMENTE "${currentHost}" à sua lista de domínios autorizados nas configurações de Autenticação do Firebase para resolver este problema.`);
-        } else {
-          setError('Falha ao fazer login com o Google. Tente novamente.');
+        console.error("Google Sign-In Error:", err);
+        switch (err.code) {
+          case 'auth/unauthorized-domain':
+            const currentHost = window.location.hostname;
+            setError(`Erro: Domínio não autorizado. Adicione EXATAMENTE "${currentHost}" à sua lista de domínios autorizados nas configurações de Autenticação do Firebase.`);
+            break;
+          case 'auth/operation-not-allowed':
+            setError('Erro de configuração: O login com Google não está ativado no seu projeto Firebase. Por favor, ative-o na aba "Sign-in method" da seção de Autenticação do Firebase.');
+            break;
+          case 'auth/popup-closed-by-user':
+            setError('O popup de login foi fechado antes da conclusão. Por favor, tente novamente.');
+            break;
+          case 'auth/popup-blocked':
+            setError('O popup de login foi bloqueado pelo navegador. Por favor, habilite popups para este site e tente novamente.');
+            break;
+          default:
+            setError(`Ocorreu um erro inesperado. Tente novamente. (Código: ${err.code})`);
+            break;
         }
-        console.error(err);
     } finally {
         setIsSubmitting(false);
     }

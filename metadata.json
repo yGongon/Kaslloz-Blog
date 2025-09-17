@@ -1,0 +1,5 @@
+{
+  "name": "Ouroboros Kingdom",
+  "description": "A visually-driven blog for the game Delta Force, featuring weapon builds, patch notes, and news. Includes a visual admin interface for content management, powered by React and styled with Tailwind CSS.",
+  "requestFramePermissions": []
+}

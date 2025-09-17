@@ -144,12 +144,31 @@ const Header: React.FC = () => {
                       <NavLink key={page.id} to={`/page/${page.slug}`} className={navLinkClass} onClick={() => setMobileMenuOpen(false)}>{page.title}</NavLink>
                     ))}
                      <div className="flex flex-col items-center space-y-4 mt-4 w-full">
-                      {isAdmin ? renderAuthControls(true) : (
-                          <button onClick={() => { logout(); setMobileMenuOpen(false); }} className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition duration-300 uppercase text-sm w-full">
-                              Sair
-                          </button>
+                      {isLoggedIn ? (
+                        <>
+                          {isAdmin ? (
+                            renderAuthControls(true)
+                          ) : (
+                            <div className="w-full text-center">
+                              <div className="flex items-center justify-center space-x-3 mb-4">
+                                <img src={user?.photoURL || ''} alt={user?.displayName || 'User Avatar'} className="w-10 h-10 rounded-full border-2 border-brand-red" referrerPolicy="no-referrer" />
+                                <span className="font-semibold text-white truncate">{user?.displayName}</span>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  logout();
+                                  setMobileMenuOpen(false);
+                                }}
+                                className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition duration-300 uppercase text-sm w-full"
+                              >
+                                Sair
+                              </button>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        renderAuthControls(true) // Renders Login button for guests
                       )}
-                      {!isLoggedIn && renderAuthControls(true)}
                     </div>
                 </nav>
               </div>

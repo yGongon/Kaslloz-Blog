@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+// FIX: Import the Transition type from framer-motion to resolve the TypeScript error.
+import { motion, Transition } from 'framer-motion';
 
 const pageVariants = {
   initial: {
@@ -16,7 +17,8 @@ const pageVariants = {
   },
 };
 
-const pageTransition = {
+// FIX: Explicitly type `pageTransition` with the `Transition` type to ensure compatibility.
+const pageTransition: Transition = {
   type: 'tween',
   ease: 'anticipate',
   duration: 0.5,

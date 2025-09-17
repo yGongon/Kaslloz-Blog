@@ -11,9 +11,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login } = useAuth();
+  const { login, signInWithGoogle } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleAdminSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
@@ -28,14 +28,47 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setIsSubmitting(true);
+    try {
+        await signInWithGoogle();
+        onClose();
+    } catch (err) {
+        setError('Falha ao fazer login com o Google. Tente novamente.');
+        console.error(err);
+    } finally {
+        setIsSubmitting(false);
+    }
+  }
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
       <div className="bg-brand-gray p-6 sm:p-8 rounded-lg shadow-lg w-[95%] sm:w-full max-w-sm border border-brand-light-gray/30 relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white" disabled={isSubmitting}>
           <Icon name="close" className="h-6 w-6"/>
         </button>
-        <h2 className="font-display text-2xl font-bold text-center text-white mb-6">Login de Administrador</h2>
-        <form onSubmit={handleSubmit}>
+        <h2 className="font-display text-2xl font-bold text-center text-white mb-6">Acessar Conta</h2>
+        
+        <div className="space-y-4">
+            <button
+                onClick={handleGoogleSignIn}
+                disabled={isSubmitting}
+                className="w-full flex items-center justify-center space-x-2 bg-white text-gray-700 font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-brand-gray focus:ring-white transition-colors duration-300 disabled:opacity-50"
+            >
+                <Icon name="google" className="h-5 w-5"/>
+                <span>Entrar com Google</span>
+            </button>
+
+            <div className="relative flex py-2 items-center">
+                <div className="flex-grow border-t border-brand-light-gray"></div>
+                <span className="flex-shrink mx-4 text-gray-400 text-xs uppercase">Ou</span>
+                <div className="flex-grow border-t border-brand-light-gray"></div>
+            </div>
+        </div>
+
+        <form onSubmit={handleAdminSubmit}>
+           <p className="text-center text-gray-400 text-sm mb-4">Login de Administrador</p>
           <div className="mb-4">
             <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="email">
               Email

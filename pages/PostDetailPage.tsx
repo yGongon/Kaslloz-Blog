@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -16,38 +15,25 @@ import PageTransition from '../components/PageTransition';
 const PostDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getPostById, deletePost } = usePosts();
-  const { isLoggedIn } = useAuth();
+  const { posts, getPostById, deletePost } = usePosts();
+  const { isAdmin } = useAuth();
   const [post, setPost] = useState<Post | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (id) {
+    // Wait until posts are loaded before trying to find the post.
+    if (id && posts.length > 0) {
       const foundPost = getPostById(id);
       if (foundPost) {
         setPost(foundPost);
+      } else {
+        // If posts are loaded but the post is not found, redirect.
+        console.log(`Post with id ${id} not found. Redirecting.`);
+        navigate('/');
       }
-      // Note: We don't redirect immediately if post is not found on first render
-      // because posts might still be loading. The context will trigger a re-render.
-      setIsLoading(false);
     }
-  }, [id, getPostById, navigate]);
+  }, [id, posts, getPostById, navigate]);
 
-  useEffect(() => {
-    // This effect runs after the first one and handles the case where the post
-    // is definitively not found after posts have loaded.
-    if (!isLoading && !post && id) {
-        const foundPost = getPostById(id);
-        if(foundPost) {
-            setPost(foundPost);
-        } else {
-            console.log(`Post with id ${id} not found. Redirecting.`);
-            navigate('/'); 
-        }
-    }
-  }, [post, isLoading, id, getPostById, navigate]);
-  
   const handleDelete = async () => {
     if (post && window.confirm('Você tem certeza que deseja deletar este post?')) {
       const success = await deletePost(post.id);
@@ -59,7 +45,8 @@ const PostDetailPage: React.FC = () => {
     }
   }
 
-  if (isLoading || !post) {
+  // Display a loading message while posts are being fetched or the specific post is being identified.
+  if (posts.length === 0 || !post) {
     return <div className="text-center font-display text-2xl">Carregando Post...</div>;
   }
   
@@ -114,7 +101,7 @@ const PostDetailPage: React.FC = () => {
 
           <footer className="mt-8 pt-6 border-t border-brand-light-gray/30 flex flex-col sm:flex-row justify-between items-center gap-4">
               <SocialShareButtons />
-              {isLoggedIn && (
+              {isAdmin && (
                   <div className="flex space-x-4">
                       <button onClick={() => setIsEditModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">Editar</button>
                       <button onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">Deletar</button>

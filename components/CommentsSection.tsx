@@ -14,7 +14,7 @@ interface CommentsSectionProps {
 
 const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
   const { addComment, deleteComment } = useComments();
-  const { isLoggedIn } = useAuth();
+  const { user, isLoggedIn, isAdmin } = useAuth();
   const [name, setName] = useState('');
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
@@ -38,18 +38,15 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
       if (snapshot.exists()) {
         snapshot.forEach((doc) => {
           const data = doc.val();
-          if (data.createdAt) { // Ensure the comment has a timestamp
+          if (data.createdAt) {
             commentsData.push({
               id: doc.key!,
-              postId: data.postId,
-              name: data.name,
-              comment: data.comment,
+              ...data,
               createdAt: new Date(data.createdAt).toISOString(),
             });
           }
         });
       }
-      // Sort client-side because RTDB can't filter and sort on different keys
       commentsData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setComments(commentsData);
       setIsLoading(false);
@@ -59,20 +56,34 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
       setIsLoading(false);
     });
 
-    // Detach the listener when the component unmounts to prevent memory leaks
     return () => unsubscribe();
   }, [postId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !comment.trim()) {
+    if (!comment.trim() || (!isLoggedIn && !name.trim())) {
       setError('Nome e comentário são obrigatórios.');
       return;
     }
     setError('');
     setIsSubmitting(true);
     try {
-      await addComment({ postId, name, comment });
+      const commentData = isLoggedIn && user 
+        ? {
+            postId,
+            userId: user.uid,
+            name: user.displayName || 'Usuário Anônimo',
+            photoURL: user.photoURL || undefined,
+            comment,
+          }
+        : {
+            postId,
+            userId: 'guest',
+            name,
+            comment,
+          };
+
+      await addComment(commentData);
       setName('');
       setComment('');
     } catch (err) {
@@ -99,18 +110,26 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
       <div className="bg-brand-gray p-6 rounded-lg border border-brand-light-gray/30 mb-8">
         <h3 className="font-display text-xl font-bold text-white mb-4">Deixe um comentário</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-gray-400 text-sm font-bold mb-2">Seu Nome</label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red"
-              required
-              disabled={isSubmitting}
-            />
-          </div>
+          {isLoggedIn && user ? (
+            <div className="flex items-center space-x-3 p-2 bg-brand-dark rounded-md">
+                <img src={user.photoURL || ''} alt={user.displayName || 'User'} className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" />
+                <p className="text-white font-semibold">Comentando como {user.displayName}</p>
+            </div>
+          ) : (
+             <div>
+                <label htmlFor="name" className="block text-gray-400 text-sm font-bold mb-2">Seu Nome</label>
+                <input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red"
+                  required
+                  disabled={isSubmitting}
+                />
+              </div>
+          )}
+         
           <div>
             <label htmlFor="comment" className="block text-gray-400 text-sm font-bold mb-2">Comentário</label>
             <textarea
@@ -121,6 +140,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
               className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red"
               required
               disabled={isSubmitting}
+              placeholder={isLoggedIn ? `O que você acha, ${user?.displayName?.split(' ')[0]}?` : 'Escreva seu comentário...'}
             />
             <p className="text-xs text-gray-500 mt-1">
               Você pode usar <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Markdown</a> para formatação.
@@ -144,26 +164,35 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId }) => {
             <p className="text-gray-400 text-center">Carregando comentários...</p>
         ) : comments.length > 0 ? (
           comments.map((c) => (
-            <div key={c.id} className="bg-brand-gray p-4 rounded-lg border border-brand-light-gray/20">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <p className="font-bold text-white">{c.name}</p>
-                  <p className="text-xs text-gray-500">{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(c.createdAt))}</p>
-                </div>
-                {isLoggedIn && (
-                  <button
-                    onClick={() => handleDeleteComment(c.id)}
-                    className="text-gray-500 hover:text-brand-red transition-colors duration-200"
-                    aria-label="Deletar comentário"
-                  >
-                    <Icon name="trash" className="w-5 h-5" />
-                  </button>
+            <div key={c.id} className="flex items-start bg-brand-gray p-4 rounded-lg border border-brand-light-gray/20">
+               {c.photoURL ? (
+                    <img src={c.photoURL} alt={c.name} className="w-10 h-10 rounded-full mr-4 flex-shrink-0" referrerPolicy="no-referrer" />
+                ) : (
+                    <div className="w-10 h-10 rounded-full bg-brand-light-gray flex items-center justify-center mr-4 flex-shrink-0">
+                        <Icon name="user" className="h-6 w-6 text-gray-400" />
+                    </div>
                 )}
-              </div>
-              <div className="prose prose-invert prose-sm max-w-none text-gray-300">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {c.comment}
-                </ReactMarkdown>
+              <div className="flex-grow">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <p className="font-bold text-white">{c.name}</p>
+                      <p className="text-xs text-gray-500">{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(c.createdAt))}</p>
+                    </div>
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleDeleteComment(c.id)}
+                        className="text-gray-500 hover:text-brand-red transition-colors duration-200"
+                        aria-label="Deletar comentário"
+                      >
+                        <Icon name="trash" className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+                  <div className="prose prose-invert prose-sm max-w-none text-gray-300">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {c.comment}
+                    </ReactMarkdown>
+                  </div>
               </div>
             </div>
           ))

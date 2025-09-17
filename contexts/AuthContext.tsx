@@ -4,13 +4,17 @@ import {
   User, 
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
-  signOut 
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup
 } from 'firebase/auth';
 
 interface AuthContextType {
   user: User | null;
   isLoggedIn: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
@@ -20,10 +24,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      // Simple admin check: if the provider is 'password', it's an admin.
+      const adminCheck = !!currentUser && currentUser.providerData[0]?.providerId === 'password';
+      setIsAdmin(adminCheck);
       setIsLoading(false);
     });
     // Cleanup subscription on unmount
@@ -34,6 +42,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await signInWithEmailAndPassword(auth, email, password);
   };
 
+  const signInWithGoogle = async (): Promise<void> => {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+  };
+
   const logout = async (): Promise<void> => {
     await signOut(auth);
   };
@@ -41,7 +54,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const value = {
     user,
     isLoggedIn: !!user,
+    isAdmin,
     login,
+    signInWithGoogle,
     logout,
     isLoading,
   };

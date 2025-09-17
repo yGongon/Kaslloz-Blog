@@ -33,11 +33,12 @@ export interface Page {
   createdAt: string;
 }
 
-// FIX: Add the missing Comment interface.
 export interface Comment {
   id: string;
   postId: string;
-  name: string;
+  userId: string; // Firebase Auth UID, or 'guest'
+  name: string; // User's display name or guest name
+  photoURL?: string; // User's photo URL
   comment: string;
   createdAt: string;
 }

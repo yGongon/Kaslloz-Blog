@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -13,17 +12,19 @@ const GenericPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { pages, getPageBySlug, deletePage } = usePages();
-  const { isLoggedIn } = useAuth();
+  const { isAdmin } = useAuth();
   const [page, setPage] = useState<Page | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
+    // Wait until pages are loaded before trying to find the page.
     if (slug && pages.length > 0) {
       const foundPage = getPageBySlug(slug);
       if (foundPage) {
         setPage(foundPage);
       } else {
-        navigate('/'); // Redireciona se a página não for encontrada
+        // If pages are loaded but the page is not found, redirect.
+        navigate('/'); 
       }
     }
   }, [slug, pages, getPageBySlug, navigate]);
@@ -39,7 +40,8 @@ const GenericPage: React.FC = () => {
     }
   }
 
-  if (!page) {
+  // Display a loading message while pages are being fetched or the specific page is being identified.
+  if (pages.length === 0 || !page) {
     return <div className="text-center font-display text-2xl">Carregando Página...</div>;
   }
 
@@ -59,7 +61,7 @@ const GenericPage: React.FC = () => {
           </div>
           
           <footer className="mt-8 pt-6 border-t border-brand-light-gray/30 flex justify-end items-center gap-4">
-              {isLoggedIn && (
+              {isAdmin && (
                   <div className="flex space-x-4">
                       <button onClick={() => setIsEditModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">Editar</button>
                       <button onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300">Deletar</button>

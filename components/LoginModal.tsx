@@ -36,7 +36,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
         onClose();
     } catch (err: any) {
         if (err.code === 'auth/unauthorized-domain') {
-          setError('Este domínio não está autorizado para login. O administrador do site precisa adicionar este domínio à lista de domínios autorizados no Firebase.');
+          const currentHost = window.location.hostname;
+          setError(`Erro: Domínio não autorizado. Adicione EXATAMENTE "${currentHost}" à sua lista de domínios autorizados nas configurações de Autenticação do Firebase para resolver este problema.`);
         } else {
           setError('Falha ao fazer login com o Google. Tente novamente.');
         }
@@ -101,7 +102,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ onClose }) => {
               disabled={isSubmitting}
             />
           </div>
-          {error && <p className="text-red-500 text-xs italic mb-4 text-center">{error}</p>}
+          {error && <p className="text-red-500 text-xs italic mb-4 text-center break-words">{error}</p>}
           <div className="flex items-center justify-center">
             <button
               type="submit"

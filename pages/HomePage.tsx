@@ -15,7 +15,7 @@ const HomePage: React.FC = () => {
     <PageTransition>
       <div className="space-y-16">
         {/* Seção Hero */}
-        <section className="text-center bg-brand-gray p-8 md:p-12 rounded-lg border-2 border-brand-light-gray/20 shadow-lg" style={{backgroundImage: `url('https://picsum.photos/seed/deltaforcehero/1200/400')`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
+        <section className="text-center bg-brand-gray p-8 md:p-12 rounded-lg border-2 border-brand-light-gray/20 shadow-lg" style={{backgroundImage: `url('https://i.postimg.cc/hvcsrt4p/Banner.png')`, backgroundSize: 'cover', backgroundPosition: 'center'}}>
           <div className="bg-black/60 p-6 rounded-md">
               <h1 className="font-display text-3xl sm:text-4xl md:text-6xl font-black uppercase text-white tracking-widest">Ouroboros Kingdom</h1>
               <p className="mt-4 text-base sm:text-lg text-gray-300 max-w-2xl mx-auto">Sua fonte #1 para builds de armas, notas de patch e as últimas informações sobre Delta Force.</p>

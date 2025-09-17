@@ -13,6 +13,7 @@ import PatchNotesPage from './pages/PatchNotesPage';
 import PostDetailPage from './pages/PostDetailPage';
 import GenericPage from './pages/GenericPage';
 import { AnimatePresence } from 'framer-motion';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
 const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
@@ -24,6 +25,7 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/patch-notes" element={<PatchNotesPage />} />
         <Route path="/page/:slug" element={<GenericPage />} />
         <Route path="/post/:id" element={<PostDetailPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
       </Routes>
     </AnimatePresence>
   );

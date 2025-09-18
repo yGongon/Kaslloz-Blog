@@ -143,6 +143,10 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     await runTransaction(postRef, (post) => {
       if (post) {
+        // FIX: Initialize vote counts if they are undefined to prevent NaN errors.
+        post.upvotes = post.upvotes || 0;
+        post.downvotes = post.downvotes || 0;
+        
         if (currentVote === voteType) { // Undoing vote
           post[voteType === 'up' ? 'upvotes' : 'downvotes']--;
           remove(userVoteRef);

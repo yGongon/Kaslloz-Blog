@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import ReactQuill from 'react-quill';
 import { usePages } from '../contexts/PagesContext';
 import { Page } from '../types';
 import { Icon } from './Icon';
@@ -49,6 +50,16 @@ const PageModal: React.FC<PageModalProps> = ({ pageToEdit, onClose }) => {
     onClose();
   };
 
+  const quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+      [{'list': 'ordered'}, {'list': 'bullet'}],
+      ['link'],
+      ['clean']
+    ],
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
       <div className="bg-brand-gray p-4 sm:p-8 rounded-lg shadow-lg w-[95%] sm:w-full max-w-3xl border border-brand-light-gray/30 relative max-h-[90vh] overflow-y-auto">
@@ -67,9 +78,13 @@ const PageModal: React.FC<PageModalProps> = ({ pageToEdit, onClose }) => {
              <p className="text-xs text-gray-500 mt-1">Ex: /page/{slug}</p>
           </div>
           <div>
-            <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="content">Conteúdo</label>
-            <textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} rows={12} className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red" required />
-             <p className="text-xs text-gray-500 mt-1">Use linhas em branco para separar parágrafos.</p>
+            <label className="block text-gray-400 text-sm font-bold mb-2">Conteúdo</label>
+            <ReactQuill 
+              theme="snow" 
+              value={content} 
+              onChange={setContent}
+              modules={quillModules}
+            />
           </div>
           
           <div className="flex items-center justify-end pt-4 space-x-4">

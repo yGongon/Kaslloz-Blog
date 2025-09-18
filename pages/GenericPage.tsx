@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { usePages } from '../contexts/PagesContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Page } from '../types';
@@ -54,11 +52,10 @@ const GenericPage: React.FC = () => {
             <p className="text-sm text-gray-500 mt-2">Última atualização em {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(new Date(page.createdAt))}</p>
           </header>
 
-          <div className="prose prose-invert lg:prose-xl max-w-none text-gray-300 prose-headings:font-display prose-headings:text-white prose-strong:text-white">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {page.content}
-              </ReactMarkdown>
-          </div>
+          <div 
+            className="prose prose-invert lg:prose-xl max-w-none text-gray-300 prose-headings:font-display prose-headings:text-white prose-strong:text-white"
+            dangerouslySetInnerHTML={{ __html: page.content }}
+          />
           
           <footer className="mt-8 pt-6 border-t border-brand-light-gray/30 flex justify-end items-center gap-4">
               {isAdmin && (

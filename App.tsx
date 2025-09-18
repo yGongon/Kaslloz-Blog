@@ -5,6 +5,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { PostsProvider } from './contexts/PostsContext';
 import { PagesProvider } from './contexts/PagesContext';
 import { CommentsProvider } from './contexts/CommentsContext';
+import { SiteConfigProvider } from './contexts/SiteConfigContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -15,6 +16,7 @@ import PostDetailPage from './pages/PostDetailPage';
 import GenericPage from './pages/GenericPage';
 import { AnimatePresence } from 'framer-motion';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import ProfilePage from './pages/ProfilePage';
 
 const AnimatedRoutes: React.FC = () => {
   const location = useLocation();
@@ -27,6 +29,7 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/guias" element={<OperatorGuidesPage />} />
         <Route path="/page/:slug" element={<GenericPage />} />
         <Route path="/post/:id" element={<PostDetailPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
       </Routes>
     </AnimatePresence>
@@ -39,15 +42,17 @@ const App: React.FC = () => {
       <PostsProvider>
         <PagesProvider>
           <CommentsProvider>
-            <HashRouter>
-              <div className="min-h-screen flex flex-col font-sans bg-brand-dark text-gray-200">
-                <Header />
-                <main className="flex-grow container mx-auto px-4 py-8">
-                  <AnimatedRoutes />
-                </main>
-                <Footer />
-              </div>
-            </HashRouter>
+            <SiteConfigProvider>
+              <HashRouter>
+                <div className="min-h-screen flex flex-col font-sans bg-brand-dark text-gray-200">
+                  <Header />
+                  <main className="flex-grow container mx-auto px-4 py-8">
+                    <AnimatedRoutes />
+                  </main>
+                  <Footer />
+                </div>
+              </HashRouter>
+            </SiteConfigProvider>
           </CommentsProvider>
         </PagesProvider>
       </PostsProvider>

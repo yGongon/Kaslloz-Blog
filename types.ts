@@ -44,4 +44,12 @@ export interface Comment {
   photoURL?: string;
   comment: string;
   createdAt: string;
+  postTitle?: string;
+}
+
+export interface SiteConfig {
+  clipOfTheWeek: {
+    title: string;
+    youtubeId: string;
+  };
 }

@@ -150,7 +150,7 @@ const PostDetailPage: React.FC = () => {
             <AdBanner />
           </div>
 
-          <CommentsSection postId={post.id} onLoginRequest={() => setIsLoginModalOpen(true)} />
+          <CommentsSection postId={post.id} postTitle={post.title} onLoginRequest={() => setIsLoginModalOpen(true)} />
 
           <footer className="mt-8 pt-6 border-t border-brand-light-gray/30 flex flex-col sm:flex-row justify-between items-center gap-4">
               <SocialShareButtons />

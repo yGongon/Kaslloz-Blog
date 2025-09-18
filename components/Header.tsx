@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { usePages } from '../contexts/PagesContext';
@@ -91,6 +91,13 @@ const Header: React.FC = () => {
                 <div className="p-2">
                     <p className="px-2 py-1 text-white font-semibold truncate">{user?.displayName}</p>
                     <div className="my-1 border-t border-brand-light-gray/20"></div>
+                    <Link 
+                        to="/profile"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="w-full text-left block px-2 py-1 text-sm text-gray-300 hover:bg-brand-red hover:text-white rounded"
+                    >
+                        Meu Perfil
+                    </Link>
                     <button 
                         onClick={() => { logout(); setUserMenuOpen(false); if (isMobile) setMobileMenuOpen(false); }} 
                         className="w-full text-left px-2 py-1 text-sm text-gray-300 hover:bg-brand-red hover:text-white rounded"
@@ -156,6 +163,9 @@ const Header: React.FC = () => {
                                 <img src={user?.photoURL || ''} alt={user?.displayName || 'User Avatar'} className="w-10 h-10 rounded-full border-2 border-brand-red" referrerPolicy="no-referrer" />
                                 <span className="font-semibold text-white truncate">{user?.displayName}</span>
                               </div>
+                               <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 uppercase text-sm w-full mb-2 block">
+                                  Meu Perfil
+                              </Link>
                               <button
                                 onClick={() => {
                                   logout();

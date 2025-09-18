@@ -1,0 +1,38 @@
+{
+  "rules": {
+    "posts": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.email === 'wevelleytwich@gmail.com' || auth.token.email === 'emanuelcarlos534@gmail.com')",
+      "$postId": {
+        ".validate": "newData.hasChildren(['title', 'content', 'category', 'imageUrl', 'createdAt'])"
+      }
+    },
+    "pages": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.email === 'wevelleytwich@gmail.com' || auth.token.email === 'emanuelcarlos534@gmail.com')",
+      "$pageId": {
+        ".validate": "newData.hasChildren(['title', 'content', 'slug', 'createdAt'])"
+      }
+    },
+    "comments": {
+      ".read": true,
+      "$commentId": {
+        // Allow write if: user is authenticated AND (it's a new comment OR they are the owner OR they are an admin)
+        ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid || (auth.token.email === 'wevelleytwich@gmail.com' || auth.token.email === 'emanuelcarlos534@gmail.com'))",
+        // When creating a new comment, validate the data integrity
+        ".validate": "newData.hasChildren(['postId', 'userId', 'name', 'comment', 'createdAt']) && newData.child('userId').val() === auth.uid"
+      }
+    },
+    "user_votes": {
+      ".read": true, // Read is public, but client logic only fetches current user's votes
+      "$uid": {
+        // A user can only write to their own vote data
+        ".write": "auth != null && $uid === auth.uid"
+      }
+    },
+    "site_config": {
+        ".read": true,
+        ".write": "auth != null && (auth.token.email === 'wevelleytwich@gmail.com' || auth.token.email === 'emanuelcarlos534@gmail.com')"
+    }
+  }
+}

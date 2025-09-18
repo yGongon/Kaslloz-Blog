@@ -16,6 +16,7 @@ export const Icon: React.FC<{ name: string, className?: string }> = ({ name, cla
     user: <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />,
     arrowUp: <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />,
     arrowDown: <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />,
+    edit: <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" />,
   };
 
   // Ícones que são desenhados com formas preenchidas (fill)

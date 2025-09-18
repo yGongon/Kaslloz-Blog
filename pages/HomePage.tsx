@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { usePosts } from '../contexts/PostsContext';
 import { Post, Category } from '../types';
 import PostCard from '../components/PostCard';
@@ -6,19 +6,20 @@ import { Link } from 'react-router-dom';
 import PageTransition from '../components/PageTransition';
 import YouTubeEmbed from '../components/YouTubeEmbed';
 import AdBanner from '../components/AdBanner';
+import { useSiteConfig } from '../contexts/SiteConfigContext';
+import { useAuth } from '../contexts/AuthContext';
+import { Icon } from '../components/Icon';
+import ClipOfTheWeekModal from '../components/ClipOfTheWeekModal';
 
 const HomePage: React.FC = () => {
   const { posts } = usePosts();
+  const { siteConfig, loading: configLoading } = useSiteConfig();
+  const { isAdmin } = useAuth();
+  const [isClipModalOpen, setClipModalOpen] = useState(false);
 
   const latestBuilds = posts.filter(p => p.category === Category.Builds).slice(0, 3);
   const latestPatchNotes = posts.filter(p => p.category === Category.PatchNotes).slice(0, 2);
   const latestGuides = posts.filter(p => p.category === Category.OperatorGuides).slice(0, 3);
-  
-  // Hardcoded for now, can be moved to a CMS or database later
-  const clipOfTheWeek = {
-    title: "Jogada Insana de Sniper!",
-    youtubeId: "v3hM4i32Y4I" 
-  };
 
   return (
     <PageTransition>
@@ -50,10 +51,25 @@ const HomePage: React.FC = () => {
 
         {/* Clip of the Week */}
         <section>
-            <h2 className="font-display text-2xl sm:text-3xl font-bold uppercase text-brand-red border-b-2 border-brand-red/50 pb-2 mb-6">{clipOfTheWeek.title}</h2>
-            <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden border-2 border-brand-light-gray/20">
-                <YouTubeEmbed embedId={clipOfTheWeek.youtubeId} />
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold uppercase text-brand-red border-b-2 border-brand-red/50 pb-2">
+                {configLoading ? 'Carregando...' : siteConfig.clipOfTheWeek.title}
+              </h2>
+              {isAdmin && (
+                <button 
+                  onClick={() => setClipModalOpen(true)}
+                  className="p-2 text-gray-400 hover:text-white hover:bg-brand-light-gray rounded-full transition-colors"
+                  aria-label="Editar Clipe da Semana"
+                >
+                  <Icon name="edit" className="w-5 h-5" />
+                </button>
+              )}
             </div>
+            {!configLoading && (
+              <div className="max-w-lg mx-auto rounded-lg overflow-hidden border-2 border-brand-light-gray/20 shadow-lg">
+                  <YouTubeEmbed embedId={siteConfig.clipOfTheWeek.youtubeId} />
+              </div>
+            )}
         </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-16">
@@ -85,8 +101,8 @@ const HomePage: React.FC = () => {
             </div>
           </section>
         </div>
-
       </div>
+      {isClipModalOpen && <ClipOfTheWeekModal onClose={() => setClipModalOpen(false)} />}
     </PageTransition>
   );
 };

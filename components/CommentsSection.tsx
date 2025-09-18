@@ -10,10 +10,11 @@ import { Icon } from './Icon';
 
 interface CommentsSectionProps {
   postId: string;
+  postTitle: string;
   onLoginRequest: () => void;
 }
 
-const CommentsSection: React.FC<CommentsSectionProps> = ({ postId, onLoginRequest }) => {
+const CommentsSection: React.FC<CommentsSectionProps> = ({ postId, postTitle, onLoginRequest }) => {
   const { addComment, deleteComment } = useComments();
   const { user, isLoggedIn, isAdmin } = useAuth();
   const [comment, setComment] = useState('');
@@ -78,6 +79,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ postId, onLoginReques
         name: user.displayName || 'Usuário Anônimo',
         photoURL: user.photoURL || undefined,
         comment,
+        postTitle,
       };
 
       await addComment(commentData);

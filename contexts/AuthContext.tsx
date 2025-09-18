@@ -21,6 +21,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Lista de e-mails autorizados como administradores
+const ADMIN_EMAILS = ['wevelleytwich@gmail.com', 'emanuelcarlos534@gmail.com'];
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,8 +32,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      // Simple admin check: if the provider is 'password', it's an admin.
-      const adminCheck = !!currentUser && currentUser.providerData[0]?.providerId === 'password';
+      // Verificação de admin baseada na lista de e-mails
+      const adminCheck = !!currentUser && ADMIN_EMAILS.includes(currentUser.email || '');
       setIsAdmin(adminCheck);
       setIsLoading(false);
     });

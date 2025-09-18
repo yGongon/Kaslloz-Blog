@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ReactQuill from 'react-quill';
 import { usePosts } from '../contexts/PostsContext';
 import { Post, Category, WeaponType } from '../types';
-import { generatePostIdea } from '../services/geminiService';
 import { Icon } from './Icon';
 
 interface PostModalProps {
@@ -41,7 +40,6 @@ const PostModal: React.FC<PostModalProps> = ({ postToEdit, onClose }) => {
   const [version, setVersion] = useState('');
   const [weaponType, setWeaponType] = useState<WeaponType>(WeaponType.AssaultRifle);
   const [tags, setTags] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     if (postToEdit) {
@@ -88,21 +86,6 @@ const PostModal: React.FC<PostModalProps> = ({ postToEdit, onClose }) => {
     onClose();
   };
   
-  const handleGenerateIdea = useCallback(async () => {
-    setIsGenerating(true);
-    const idea = await generatePostIdea(category);
-    const titleMatch = idea.match(/Title: (.*)/);
-    const contentMatch = idea.match(/Content: (.*)/);
-
-    if (titleMatch && titleMatch[1]) {
-        setTitle(titleMatch[1].trim());
-    }
-    if (contentMatch && contentMatch[1]) {
-        setContent(`<p>${contentMatch[1].trim()}</p>`);
-    }
-    setIsGenerating(false);
-  }, [category]);
-  
   const quillModules = {
     toolbar: [
       [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
@@ -133,12 +116,6 @@ const PostModal: React.FC<PostModalProps> = ({ postToEdit, onClose }) => {
               <option value={Category.PatchNotes}>Notas de Patch</option>
               <option value={Category.OperatorGuides}>Guias</option>
             </select>
-          </div>
-           <div>
-            <button type="button" onClick={handleGenerateIdea} disabled={isGenerating} className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors duration-300 disabled:bg-gray-500">
-              <Icon name="gemini" className="w-5 h-5" />
-              <span>{isGenerating ? 'Gerando...' : 'Gerar Ideia com IA'}</span>
-            </button>
           </div>
           <div>
             <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="title">Título</label>

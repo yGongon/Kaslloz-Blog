@@ -41,6 +41,11 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
       alert("Você precisa fazer login para votar.");
     }
   };
+  
+  const stripHtml = (html: string) => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    return doc.body.textContent || "";
+  }
 
   return (
     <div className="bg-brand-gray border border-brand-light-gray/30 rounded-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 shadow-lg hover:shadow-neon-red flex flex-col">
@@ -53,7 +58,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
               <span className={categoryColor}>{post.category} {post.version && ` - v${post.version}`}</span>
             </div>
             <h3 className="font-display text-2xl font-bold text-white mb-2 truncate">{post.title}</h3>
-            <p className="text-gray-400 line-clamp-2 mb-4">{post.content.replace(/\*\*|`/g, '')}</p>
+            <p className="text-gray-400 line-clamp-2 mb-4">{stripHtml(post.content)}</p>
           </div>
           <div>
              {post.tags && post.tags.length > 0 && (

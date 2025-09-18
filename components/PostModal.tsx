@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import ReactQuill from 'react-quill';
 import { usePosts } from '../contexts/PostsContext';
 import { Post, Category, WeaponType } from '../types';
 import { generatePostIdea } from '../services/geminiService';
@@ -97,14 +98,29 @@ const PostModal: React.FC<PostModalProps> = ({ postToEdit, onClose }) => {
         setTitle(titleMatch[1].trim());
     }
     if (contentMatch && contentMatch[1]) {
-        setContent(contentMatch[1].trim());
+        setContent(`<p>${contentMatch[1].trim()}</p>`);
     }
     setIsGenerating(false);
   }, [category]);
+  
+  const quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      [{ 'font': [] }],
+      [{ 'size': ['small', false, 'large', 'huge'] }],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
+      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+      [{ 'script': 'sub'}, { 'script': 'super' }],
+      [{ 'align': [] }],
+      [{ 'color': [] }, { 'background': [] }],
+      ['link', 'image', 'video'],
+      ['clean']
+    ],
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
-      <div className="bg-brand-gray p-4 sm:p-8 rounded-lg shadow-lg w-[95%] sm:w-full max-w-3xl border border-brand-light-gray/30 relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-brand-gray p-4 sm:p-8 rounded-lg shadow-lg w-[95%] sm:w-full max-w-5xl border border-brand-light-gray/30 relative max-h-[90vh] overflow-y-auto">
         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white">
           <Icon name="close" className="h-6 w-6"/>
         </button>
@@ -129,8 +145,13 @@ const PostModal: React.FC<PostModalProps> = ({ postToEdit, onClose }) => {
             <input id="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red" required />
           </div>
           <div>
-            <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="content">Conteúdo</label>
-            <textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} rows={8} className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red" required />
+            <label className="block text-gray-400 text-sm font-bold mb-2">Conteúdo</label>
+             <ReactQuill 
+              theme="snow" 
+              value={content} 
+              onChange={setContent}
+              modules={quillModules}
+            />
           </div>
           <div>
             <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="tags">Tags</label>

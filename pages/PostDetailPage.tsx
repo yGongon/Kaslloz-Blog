@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { usePosts } from '../contexts/PostsContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Post, Category } from '../types';
@@ -131,11 +129,10 @@ const PostDetailPage: React.FC = () => {
 
                 <img src={post.imageUrl} alt={post.title} className="w-full h-auto max-h-[500px] object-cover rounded-lg mb-8" />
 
-                <div className="prose prose-invert lg:prose-xl max-w-none text-gray-300 prose-headings:font-display prose-headings:text-white prose-strong:text-white">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {post.content}
-                    </ReactMarkdown>
-                </div>
+                <div 
+                  className="prose prose-invert lg:prose-xl max-w-none text-gray-300 prose-headings:font-display prose-headings:text-white prose-strong:text-white"
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                />
 
                 {post.youtubeId && (
                   <div className="my-8">

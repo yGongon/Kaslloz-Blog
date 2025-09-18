@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import ReactQuill from 'react-quill';
 import { usePosts } from '../contexts/PostsContext';
 import { Post, Category, WeaponType } from '../types';
 import { generatePostIdea } from '../services/geminiService';
@@ -98,20 +97,10 @@ const PostModal: React.FC<PostModalProps> = ({ postToEdit, onClose }) => {
         setTitle(titleMatch[1].trim());
     }
     if (contentMatch && contentMatch[1]) {
-        setContent(`<p>${contentMatch[1].trim()}</p>`);
+        setContent(contentMatch[1].trim());
     }
     setIsGenerating(false);
   }, [category]);
-  
-  const quillModules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-      [{'list': 'ordered'}, {'list': 'bullet'}],
-      ['link'],
-      ['clean']
-    ],
-  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50 p-4">
@@ -140,13 +129,8 @@ const PostModal: React.FC<PostModalProps> = ({ postToEdit, onClose }) => {
             <input id="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red" required />
           </div>
           <div>
-            <label className="block text-gray-400 text-sm font-bold mb-2">Conteúdo</label>
-             <ReactQuill 
-              theme="snow" 
-              value={content} 
-              onChange={setContent}
-              modules={quillModules}
-            />
+            <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="content">Conteúdo</label>
+            <textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} rows={8} className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red" required />
           </div>
           <div>
             <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="tags">Tags</label>

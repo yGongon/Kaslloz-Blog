@@ -13,6 +13,7 @@ interface PostsContextType {
   getPostById: (id: string) => Post | undefined;
   voteOnPost: (postId: string, voteType: 'up' | 'down') => Promise<void>;
   userVotes: { [postId: string]: 'up' | 'down' };
+  resetAllVotes: () => Promise<void>;
 }
 
 const PostsContext = createContext<PostsContextType | undefined>(undefined);
@@ -191,12 +192,49 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   }, [user, userVotes]);
 
+  const resetAllVotes = useCallback(async () => {
+    if (!window.confirm('TEM CERTEZA? Esta ação irá zerar permanentemente TODOS os votos de TODOS os posts e não pode ser desfeita.')) {
+      return;
+    }
+
+    console.log("Iniciando a redefinição de todos os votos...");
+    try {
+      const postsRef = ref(db, 'posts');
+      const postsSnapshot = await get(postsRef);
+      
+      const updates: { [key: string]: any } = {};
+
+      // Marcar toda a árvore de user_votes para exclusão
+      updates['/user_votes'] = null;
+
+      // Percorrer todos os posts e zerar os contadores
+      if (postsSnapshot.exists()) {
+        postsSnapshot.forEach(postSnapshot => {
+          const postId = postSnapshot.key;
+          if (postId) {
+            updates[`/posts/${postId}/upvotes`] = 0;
+            updates[`/posts/${postId}/downvotes`] = 0;
+          }
+        });
+      }
+
+      // Executar a atualização atômica
+      await update(ref(db), updates);
+      
+      alert('Todos os votos foram zerados com sucesso!');
+      console.log("Todos os votos foram redefinidos.");
+    } catch (error) {
+      console.error("Erro ao zerar os votos:", error);
+      alert('Ocorreu um erro ao zerar os votos. Verifique o console.');
+    }
+  }, []);
+
 
   const getPostById = useCallback((id: string): Post | undefined => {
     return posts.find(p => p.id === id);
   }, [posts]);
 
-  const value = useMemo(() => ({ posts, addPost, updatePost, deletePost, getPostById, voteOnPost, userVotes }), [posts, addPost, updatePost, deletePost, getPostById, voteOnPost, userVotes]);
+  const value = useMemo(() => ({ posts, addPost, updatePost, deletePost, getPostById, voteOnPost, userVotes, resetAllVotes }), [posts, addPost, updatePost, deletePost, getPostById, voteOnPost, userVotes, resetAllVotes]);
 
   return (
     <PostsContext.Provider value={value}>
@@ -212,4 +250,3 @@ export const usePosts = (): PostsContextType => {
   }
   return context;
 };
-

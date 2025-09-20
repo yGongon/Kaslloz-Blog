@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { auth } from '../firebase/config';
+import { auth, db } from '../firebase/config'; // Import db
 import { 
   User, 
   onAuthStateChanged, 
@@ -9,6 +9,7 @@ import {
   signInWithPopup,
   updateProfile
 } from 'firebase/auth';
+import { ref, query, orderByChild, equalTo, get, update } from 'firebase/database'; // Import database functions
 
 interface AuthContextType {
   user: User | null;
@@ -59,9 +60,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const updateUserProfile = async (displayName: string): Promise<void> => {
     const currentUser = auth.currentUser;
     if (currentUser) {
+      // 1. Atualiza o perfil no Firebase Auth
       await updateProfile(currentUser, { displayName });
-      // Forçar a atualização do estado do usuário na aplicação
-      setUser({ ...currentUser }); 
+
+      // 2. Procura e atualiza o nome em todos os comentários do usuário
+      const commentsRef = ref(db, 'comments');
+      const userCommentsQuery = query(commentsRef, orderByChild('userId'), equalTo(currentUser.uid));
+      const snapshot = await get(userCommentsQuery);
+
+      if (snapshot.exists()) {
+        const updates: { [key: string]: any } = {};
+        snapshot.forEach((childSnapshot) => {
+          const commentId = childSnapshot.key;
+          // Prepara a atualização para o campo 'name' de cada comentário encontrado
+          if (commentId) {
+            updates[`/comments/${commentId}/name`] = displayName;
+          }
+        });
+        // Executa todas as atualizações de uma só vez
+        await update(ref(db), updates);
+      }
+
+      // 3. Força a atualização do estado do usuário na aplicação para refletir a mudança imediatamente
+      setUser({ ...currentUser });
     } else {
       throw new Error("Nenhum usuário logado para atualizar.");
     }

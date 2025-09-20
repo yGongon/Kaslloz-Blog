@@ -8,10 +8,13 @@ import PageTransition from '../components/PageTransition';
 import { Icon } from '../components/Icon';
 
 const ProfilePage: React.FC = () => {
-  const { user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn, updateUserProfile } = useAuth();
   const navigate = useNavigate();
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -20,6 +23,7 @@ const ProfilePage: React.FC = () => {
     }
 
     if (user) {
+      setDisplayName(user.displayName || '');
       setIsLoading(true);
       const commentsRef = ref(db, 'comments');
       const userCommentsQuery = query(
@@ -43,8 +47,22 @@ const ProfilePage: React.FC = () => {
     }
   }, [user, isLoggedIn, navigate]);
   
+  const handleSaveProfile = async () => {
+    if (!user || displayName.trim() === '') return;
+    setIsSaving(true);
+    try {
+      await updateUserProfile(displayName);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Erro ao atualizar o perfil:", error);
+      alert("Não foi possível atualizar o perfil. Tente novamente.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
   if (!user) {
-    return null; // or a loading spinner
+    return null; // ou um spinner de carregamento
   }
 
   return (
@@ -52,14 +70,36 @@ const ProfilePage: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <header className="flex flex-col sm:flex-row items-center gap-6 mb-12 p-6 bg-brand-gray rounded-lg border border-brand-light-gray/20">
           <img
-            src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}&background=1F2937&color=fff`}
-            alt={user.displayName || 'User Avatar'}
+            src={user.photoURL || `https://ui-avatars.com/api/?name=${displayName}&background=1F2937&color=fff`}
+            alt={displayName || 'User Avatar'}
             className="w-24 h-24 rounded-full border-4 border-brand-red"
             referrerPolicy="no-referrer"
           />
-          <div>
-            <h1 className="font-display text-3xl font-bold text-white text-center sm:text-left">{user.displayName}</h1>
-            <p className="text-gray-400 text-center sm:text-left">{user.email}</p>
+          <div className="flex-1 text-center sm:text-left">
+            {isEditing ? (
+              <div className="flex flex-col sm:flex-row gap-2 items-center">
+                <input 
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="w-full sm:w-auto bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red text-2xl font-bold"
+                />
+                <button onClick={handleSaveProfile} disabled={isSaving} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors disabled:opacity-50">
+                  {isSaving ? 'Salvando...' : 'Salvar'}
+                </button>
+                <button onClick={() => setIsEditing(false)} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                  Cancelar
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row items-center gap-4 justify-center sm:justify-start">
+                <h1 className="font-display text-3xl font-bold text-white">{displayName}</h1>
+                <button onClick={() => setIsEditing(true)} className="p-2 text-gray-400 hover:text-white hover:bg-brand-light-gray rounded-full transition-colors">
+                  <Icon name="edit" className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+            <p className="text-gray-400">{user.email}</p>
           </div>
         </header>
 

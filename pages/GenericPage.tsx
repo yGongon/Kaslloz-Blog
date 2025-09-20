@@ -48,6 +48,13 @@ const GenericPage: React.FC = () => {
       <>
         <article className="max-w-4xl mx-auto bg-brand-gray p-4 sm:p-6 md:p-8 rounded-lg border border-brand-light-gray/30">
           <header className="mb-6 border-b-2 border-brand-red/50 pb-4">
+             <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+          
+            gtag('config', 'G-1NM1Y28PL0');
+          </script>
             <h1 className="font-display text-2xl sm:text-3xl md:text-5xl font-extrabold text-white">{page.title}</h1>
             <p className="text-sm text-gray-500 mt-2">Última atualização em {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(new Date(page.createdAt))}</p>
           </header>

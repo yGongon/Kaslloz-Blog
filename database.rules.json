@@ -3,8 +3,8 @@
     "posts": {
       ".read": true,
       "$postId": {
-        // Allow write if user is admin, OR if user is authenticated and is only changing vote counts
-        // by ensuring sensitive content fields are not modified during the transaction.
+        // Permite a escrita se o usuário for admin, OU se o usuário estiver autenticado e 
+        // estiver apenas alterando os votos (garantindo que os campos de conteúdo sensível não sejam modificados).
         ".write": "auth != null && ( (auth.token.email === 'wevelleytwich@gmail.com' || auth.token.email === 'emanuelcarlos534@gmail.com') || (newData.child('title').val() === data.child('title').val() && newData.child('content').val() === data.child('content').val() && newData.child('imageUrl').val() === data.child('imageUrl').val() && newData.child('category').val() === data.child('category').val()) )",
         ".validate": "newData.hasChildren(['title', 'content', 'category', 'imageUrl', 'createdAt'])"
       }
@@ -19,16 +19,16 @@
     "comments": {
       ".read": true,
       "$commentId": {
-        // Allow write if: user is authenticated AND (it's a new comment OR they are the owner OR they are an admin)
+        // Permite a escrita se: o usuário estiver autenticado E (for um novo comentário OU ele for o dono OU for um admin)
         ".write": "auth != null && (!data.exists() || data.child('userId').val() === auth.uid || (auth.token.email === 'wevelleytwich@gmail.com' || auth.token.email === 'emanuelcarlos534@gmail.com'))",
-        // When creating a new comment, validate the data integrity
+        // Ao criar um novo comentário, valida a integridade dos dados
         ".validate": "newData.hasChildren(['postId', 'userId', 'name', 'comment', 'createdAt']) && newData.child('userId').val() === auth.uid"
       }
     },
     "user_votes": {
-      ".read": true, // Read is public, but client logic only fetches current user's votes
+      ".read": true, // A leitura é pública, mas a lógica do cliente busca apenas os votos do usuário atual
       "$uid": {
-        // A user can only write to their own vote data
+        // Um usuário só pode escrever em seus próprios dados de voto
         ".write": "auth != null && $uid === auth.uid"
       }
     },

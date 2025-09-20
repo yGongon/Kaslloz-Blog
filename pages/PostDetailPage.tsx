@@ -63,7 +63,6 @@ const PostDetailPage: React.FC = () => {
 
   const { color: categoryColor, icon: categoryIcon, path: categoryPath } = getCategoryMeta(post.category);
   const userVote = userVotes[post.id];
-  const voteScore = (post.upvotes || 0) - (post.downvotes || 0);
 
   const handleVoteClick = (voteType: 'up' | 'down') => {
     if (isLoggedIn) {
@@ -79,14 +78,16 @@ const PostDetailPage: React.FC = () => {
         <article className="max-w-4xl mx-auto bg-brand-gray p-4 sm:p-6 md:p-8 rounded-lg border border-brand-light-gray/30">
           <div className="flex gap-4">
             {post.category === Category.Builds && (
-                 <div className="hidden sm:flex flex-col items-center space-y-2 pt-16">
+                 <div className="hidden sm:flex flex-col items-center space-y-1 pt-16">
                     <button onClick={() => handleVoteClick('up')} aria-label="Upvote" className="group p-2 rounded-full hover:bg-brand-light-gray transition-colors">
                         <Icon name="arrowUp" className={`w-7 h-7 transition-colors ${userVote === 'up' ? 'text-brand-red' : 'text-gray-500 group-hover:text-white'}`}/>
                     </button>
-                    <span className={`font-display text-2xl font-bold ${voteScore > 0 ? 'text-green-400' : voteScore < 0 ? 'text-red-400' : 'text-gray-200'}`}>{voteScore}</span>
+                    <span className="font-display text-xl font-bold text-gray-200">{post.upvotes || 0}</span>
+                    <div className="h-4"></div>
                     <button onClick={() => handleVoteClick('down')} aria-label="Downvote" className="group p-2 rounded-full hover:bg-brand-light-gray transition-colors">
                         <Icon name="arrowDown" className={`w-7 h-7 transition-colors ${userVote === 'down' ? 'text-blue-400' : 'text-gray-500 group-hover:text-white'}`}/>
                     </button>
+                    <span className="font-display text-xl font-bold text-gray-200">{post.downvotes || 0}</span>
                  </div>
             )}
             <div className="flex-1">
@@ -97,14 +98,19 @@ const PostDetailPage: React.FC = () => {
                         <span className={categoryColor}>{post.category} {post.version && ` - v${post.version}`}</span>
                     </div>
                      {post.category === Category.Builds && (
-                        <div className="sm:hidden flex items-center space-x-2">
-                            <button onClick={() => handleVoteClick('up')} aria-label="Upvote" className="group p-1">
-                                <Icon name="arrowUp" className={`w-6 h-6 transition-colors ${userVote === 'up' ? 'text-brand-red' : 'text-gray-500 group-hover:text-white'}`}/>
-                            </button>
-                            <span className={`font-display text-xl font-bold ${voteScore > 0 ? 'text-green-400' : voteScore < 0 ? 'text-red-400' : 'text-gray-200'}`}>{voteScore}</span>
-                            <button onClick={() => handleVoteClick('down')} aria-label="Downvote" className="group p-1">
-                                <Icon name="arrowDown" className={`w-6 h-6 transition-colors ${userVote === 'down' ? 'text-blue-400' : 'text-gray-500 group-hover:text-white'}`}/>
-                            </button>
+                        <div className="sm:hidden flex items-center space-x-4">
+                           <div className="flex items-center space-x-1">
+                              <button onClick={() => handleVoteClick('up')} aria-label="Upvote" className="group p-1">
+                                  <Icon name="arrowUp" className={`w-6 h-6 transition-colors ${userVote === 'up' ? 'text-brand-red' : 'text-gray-500 group-hover:text-white'}`}/>
+                              </button>
+                              <span className="font-display text-lg font-bold text-gray-200">{post.upvotes || 0}</span>
+                           </div>
+                           <div className="flex items-center space-x-1">
+                              <button onClick={() => handleVoteClick('down')} aria-label="Downvote" className="group p-1">
+                                  <Icon name="arrowDown" className={`w-6 h-6 transition-colors ${userVote === 'down' ? 'text-blue-400' : 'text-gray-500 group-hover:text-white'}`}/>
+                              </button>
+                              <span className="font-display text-lg font-bold text-gray-200">{post.downvotes || 0}</span>
+                           </div>
                         </div>
                     )}
                   </div>
@@ -167,3 +173,4 @@ const PostDetailPage: React.FC = () => {
 };
 
 export default PostDetailPage;
+

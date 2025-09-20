@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, ReactNode, useEffect, useCa
 import { Post } from '../types';
 import { INITIAL_POSTS } from '../constants';
 import { db, auth } from '../firebase/config';
-import { ref, onValue, push, set, update, remove, get, serverTimestamp, query, orderByChild, runTransaction } from 'firebase/database';
+import { ref, onValue, push, set, update, remove, get, serverTimestamp, query, orderByChild } from 'firebase/database';
 import { onAuthStateChanged, User } from 'firebase/auth';
 
 interface PostsContextType {
@@ -12,7 +12,7 @@ interface PostsContextType {
   deletePost: (id: string) => Promise<boolean>;
   getPostById: (id: string) => Post | undefined;
   voteOnPost: (postId: string, voteType: 'up' | 'down') => Promise<void>;
-  userVotes: { [postId: string]: { up?: boolean; down?: boolean; } };
+  userVotes: { [postId: string]: 'up' | 'down' };
 }
 
 const PostsContext = createContext<PostsContextType | undefined>(undefined);
@@ -39,7 +39,7 @@ const populateInitialData = async () => {
 export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [user, setUser] = useState<User | null>(auth.currentUser);
-  const [userVotes, setUserVotes] = useState<{ [postId: string]: { up?: boolean; down?: boolean; } }>({});
+  const [userVotes, setUserVotes] = useState<{ [postId: string]: 'up' | 'down' }>({});
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -138,36 +138,57 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       return;
     }
     const userId = user.uid;
-    const postRef = ref(db, `posts/${postId}`);
-    const userVoteRef = ref(db, `user_votes/${userId}/${postId}/${voteType}`);
+    const currentVote = userVotes[postId];
     
-    const hasVotedThisType = userVotes[postId] && userVotes[postId][voteType];
+    const postRef = ref(db, `posts/${postId}`);
+    const postSnapshot = await get(postRef);
+    if (!postSnapshot.exists()) {
+        console.error("Post não encontrado para votação.");
+        return;
+    };
+    const postData = postSnapshot.val();
+    
+    const updates: { [key: string]: any } = {};
+    
+    let newUpvotes = postData.upvotes || 0;
+    let newDownvotes = postData.downvotes || 0;
 
-    await runTransaction(postRef, (post) => {
-      if (post) {
-        post.upvotes = post.upvotes || 0;
-        post.downvotes = post.downvotes || 0;
-
-        if (hasVotedThisType) {
-          // Usuário está a anular o voto deste tipo
-          if (voteType === 'up') {
-            post.upvotes = Math.max(0, post.upvotes - 1); // Garante que não fica abaixo de 0
-          } else {
-            post.downvotes = Math.max(0, post.downvotes - 1); // Garante que não fica abaixo de 0
-          }
-          remove(userVoteRef);
+    // Caso A: O usuário está desfazendo o voto atual
+    if (currentVote === voteType) {
+        updates[`/user_votes/${userId}/${postId}`] = null; // Remove o voto do usuário
+        if (voteType === 'up') {
+            newUpvotes = Math.max(0, newUpvotes - 1);
         } else {
-          // Usuário está a adicionar um novo voto para este tipo
-          if (voteType === 'up') {
-            post.upvotes++;
-          } else {
-            post.downvotes++;
-          }
-          set(userVoteRef, true);
+            newDownvotes = Math.max(0, newDownvotes - 1);
         }
-      }
-      return post;
-    });
+    } 
+    // Caso B: O usuário está votando pela primeira vez ou mudando o voto
+    else {
+        updates[`/user_votes/${userId}/${postId}`] = voteType; // Define ou altera o voto do usuário
+        // Se estiver mudando de voto, diminui o contador antigo
+        if (currentVote === 'up') {
+            newUpvotes = Math.max(0, newUpvotes - 1);
+        }
+        if (currentVote === 'down') {
+            newDownvotes = Math.max(0, newDownvotes - 1);
+        }
+        // Aumenta o contador novo
+        if (voteType === 'up') {
+            newUpvotes++;
+        } else {
+            newDownvotes++;
+        }
+    }
+
+    updates[`/posts/${postId}/upvotes`] = newUpvotes;
+    updates[`/posts/${postId}/downvotes`] = newDownvotes;
+
+    // Executa a atualização atômica em múltiplos caminhos
+    try {
+        await update(ref(db), updates);
+    } catch (error) {
+        console.error("Falha ao atualizar os votos:", error);
+    }
   }, [user, userVotes]);
 
 
@@ -191,3 +212,4 @@ export const usePosts = (): PostsContextType => {
   }
   return context;
 };
+

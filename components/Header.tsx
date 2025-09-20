@@ -3,7 +3,6 @@ import { NavLink, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { usePages } from '../contexts/PagesContext';
-import { usePosts } from '../contexts/PostsContext';
 import LoginModal from './LoginModal';
 import PostModal from './PostModal';
 import PageModal from './PageModal';
@@ -12,7 +11,6 @@ import { Icon } from './Icon';
 const Header: React.FC = () => {
   const { user, isLoggedIn, isAdmin, logout } = useAuth();
   const { pages } = usePages();
-  const { resetAllVotes } = usePosts();
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
   const [isPostModalOpen, setPostModalOpen] = useState(false);
   const [isPageModalOpen, setPageModalOpen] = useState(false);
@@ -62,12 +60,6 @@ const Header: React.FC = () => {
             className={`bg-blue-600 hover:bg-blue-700 ${commonButtonClass} ${fullWidthClass}`}
           >
             Nova Página
-          </button>
-          <button
-            onClick={resetAllVotes}
-            className={`bg-yellow-600 hover:bg-yellow-700 ${commonButtonClass} ${fullWidthClass}`}
-          >
-            Zerar Votos
           </button>
           <button
             onClick={() => {

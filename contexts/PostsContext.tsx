@@ -45,7 +45,7 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (!currentUser) {
-        setUserVotes({}); // Limpa os votos no logout
+        setUserVotes({}); // Limpar votos ao fazer logout
       }
     });
     return () => unsubscribeAuth();
@@ -123,14 +123,14 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const deletePost = useCallback(async (id: string): Promise<boolean> => {
     try {
       await remove(ref(db, `posts/${id}`));
-      // Também remove os votos associados
-      await remove(ref(db, `votes/${id}`));
+      // Também remover votos associados
+      await remove(ref(db, `user_votes/${user?.uid}/${id}`));
       return true;
     } catch (error) {
       console.error("Error deleting post: ", error);
       return false;
     }
-  }, []);
+  }, [user]);
   
   const voteOnPost = useCallback(async (postId: string, voteType: 'up' | 'down') => {
     if (!user) {
@@ -149,14 +149,20 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         post.downvotes = post.downvotes || 0;
 
         if (hasVotedThisType) {
-          // Usuário está desfazendo o voto deste tipo
-          if (voteType === 'up') post.upvotes--;
-          else post.downvotes--;
+          // Usuário está a anular o voto deste tipo
+          if (voteType === 'up') {
+            post.upvotes = Math.max(0, post.upvotes - 1); // Garante que não fica abaixo de 0
+          } else {
+            post.downvotes = Math.max(0, post.downvotes - 1); // Garante que não fica abaixo de 0
+          }
           remove(userVoteRef);
         } else {
-          // Usuário está adicionando um novo voto para este tipo
-          if (voteType === 'up') post.upvotes++;
-          else post.downvotes++;
+          // Usuário está a adicionar um novo voto para este tipo
+          if (voteType === 'up') {
+            post.upvotes++;
+          } else {
+            post.downvotes++;
+          }
           set(userVoteRef, true);
         }
       }
@@ -185,4 +191,3 @@ export const usePosts = (): PostsContextType => {
   }
   return context;
 };
-

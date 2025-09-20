@@ -77,17 +77,17 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
               <span>{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(new Date(post.createdAt))}</span>
               {post.category === Category.Builds && (
                 <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-1">
-                    <button onClick={(e) => handleVoteClick(e, 'up')} disabled={!isLoggedIn} aria-label="Upvote" className={`disabled:cursor-not-allowed group`}>
-                       <Icon name="arrowUp" className={`w-5 h-5 transition-colors ${userVote?.up ? 'text-brand-red' : 'text-gray-500 group-hover:text-white'}`}/>
+                  <div className="flex items-center space-x-1 text-gray-400">
+                    <button onClick={(e) => handleVoteClick(e, 'up')} disabled={!isLoggedIn} aria-label="Gostei" className={`disabled:cursor-not-allowed group`}>
+                       <Icon name="arrowUp" className={`w-5 h-5 transition-colors ${userVote === 'up' ? 'text-green-400' : 'text-gray-500 group-hover:text-green-400'}`}/>
                     </button>
-                    <span className="font-semibold text-sm text-gray-400">{post.upvotes || 0}</span>
+                    <span className={`font-semibold text-sm ${userVote === 'up' ? 'text-green-400' : 'text-gray-400'}`}>{post.upvotes || 0}</span>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <button onClick={(e) => handleVoteClick(e, 'down')} disabled={!isLoggedIn} aria-label="Downvote" className={`disabled:cursor-not-allowed group`}>
-                       <Icon name="arrowDown" className={`w-5 h-5 transition-colors ${userVote?.down ? 'text-blue-400' : 'text-gray-500 group-hover:text-white'}`}/>
+                  <div className="flex items-center space-x-1 text-gray-400">
+                    <button onClick={(e) => handleVoteClick(e, 'down')} disabled={!isLoggedIn} aria-label="Não Gostei" className={`disabled:cursor-not-allowed group`}>
+                       <Icon name="arrowDown" className={`w-5 h-5 transition-colors ${userVote === 'down' ? 'text-red-500' : 'text-gray-500 group-hover:text-red-500'}`}/>
                     </button>
-                    <span className="font-semibold text-sm text-gray-400">{post.downvotes || 0}</span>
+                    <span className={`font-semibold text-sm ${userVote === 'down' ? 'text-red-500' : 'text-gray-400'}`}>{post.downvotes || 0}</span>
                   </div>
                 </div>
               )}

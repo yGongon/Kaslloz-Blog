@@ -79,13 +79,13 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-1">
                     <button onClick={(e) => handleVoteClick(e, 'up')} disabled={!isLoggedIn} aria-label="Upvote" className={`disabled:cursor-not-allowed group`}>
-                       <Icon name="arrowUp" className={`w-5 h-5 transition-colors ${userVote === 'up' ? 'text-brand-red' : 'text-gray-500 group-hover:text-white'}`}/>
+                       <Icon name="arrowUp" className={`w-5 h-5 transition-colors ${userVote?.up ? 'text-brand-red' : 'text-gray-500 group-hover:text-white'}`}/>
                     </button>
                     <span className="font-semibold text-sm text-gray-400">{post.upvotes || 0}</span>
                   </div>
                   <div className="flex items-center space-x-1">
                     <button onClick={(e) => handleVoteClick(e, 'down')} disabled={!isLoggedIn} aria-label="Downvote" className={`disabled:cursor-not-allowed group`}>
-                       <Icon name="arrowDown" className={`w-5 h-5 transition-colors ${userVote === 'down' ? 'text-blue-400' : 'text-gray-500 group-hover:text-white'}`}/>
+                       <Icon name="arrowDown" className={`w-5 h-5 transition-colors ${userVote?.down ? 'text-blue-400' : 'text-gray-500 group-hover:text-white'}`}/>
                     </button>
                     <span className="font-semibold text-sm text-gray-400">{post.downvotes || 0}</span>
                   </div>
@@ -100,3 +100,4 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
 };
 
 export default PostCard;
+

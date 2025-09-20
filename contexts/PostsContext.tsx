@@ -12,7 +12,7 @@ interface PostsContextType {
   deletePost: (id: string) => Promise<boolean>;
   getPostById: (id: string) => Post | undefined;
   voteOnPost: (postId: string, voteType: 'up' | 'down') => Promise<void>;
-  userVotes: { [postId: string]: 'up' | 'down' };
+  userVotes: { [postId: string]: { up?: boolean; down?: boolean; } };
 }
 
 const PostsContext = createContext<PostsContextType | undefined>(undefined);
@@ -39,13 +39,13 @@ const populateInitialData = async () => {
 export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [user, setUser] = useState<User | null>(auth.currentUser);
-  const [userVotes, setUserVotes] = useState<{ [postId: string]: 'up' | 'down' }>({});
+  const [userVotes, setUserVotes] = useState<{ [postId: string]: { up?: boolean; down?: boolean; } }>({});
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (!currentUser) {
-        setUserVotes({}); // Clear votes on logout
+        setUserVotes({}); // Limpa os votos no logout
       }
     });
     return () => unsubscribeAuth();
@@ -123,10 +123,8 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const deletePost = useCallback(async (id: string): Promise<boolean> => {
     try {
       await remove(ref(db, `posts/${id}`));
-      // Also remove associated votes
-      // This part is tricky as it would require iterating all users.
-      // A better approach is handling this via security rules or a cloud function.
-      // For now, we leave the user_votes entries, they will be orphaned but won't affect the app.
+      // Também remove os votos associados
+      await remove(ref(db, `votes/${id}`));
       return true;
     } catch (error) {
       console.error("Error deleting post: ", error);
@@ -136,35 +134,30 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   
   const voteOnPost = useCallback(async (postId: string, voteType: 'up' | 'down') => {
     if (!user) {
-      // Idealmente, isso deveria abrir o modal de login
       alert("Você precisa estar logado para votar.");
       return;
     }
     const userId = user.uid;
     const postRef = ref(db, `posts/${postId}`);
-    const userVoteRef = ref(db, `user_votes/${userId}/${postId}`);
+    const userVoteRef = ref(db, `user_votes/${userId}/${postId}/${voteType}`);
     
-    const currentVote = userVotes[postId];
+    const hasVotedThisType = userVotes[postId] && userVotes[postId][voteType];
 
     await runTransaction(postRef, (post) => {
       if (post) {
-        // Garante que os contadores de votos existam e sejam números antes de modificar
         post.upvotes = post.upvotes || 0;
         post.downvotes = post.downvotes || 0;
 
-        if (currentVote === voteType) { // Desfazendo o voto
+        if (hasVotedThisType) {
+          // Usuário está desfazendo o voto deste tipo
           if (voteType === 'up') post.upvotes--;
           else post.downvotes--;
           remove(userVoteRef);
         } else {
-          if (currentVote) { // Trocando o voto
-            if (currentVote === 'up') post.upvotes--;
-            else post.downvotes--;
-          }
-          // Aplicando o novo voto
+          // Usuário está adicionando um novo voto para este tipo
           if (voteType === 'up') post.upvotes++;
           else post.downvotes++;
-          set(userVoteRef, voteType);
+          set(userVoteRef, true);
         }
       }
       return post;
@@ -192,3 +185,4 @@ export const usePosts = (): PostsContextType => {
   }
   return context;
 };
+

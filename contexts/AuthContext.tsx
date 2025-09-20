@@ -6,7 +6,8 @@ import {
   signInWithEmailAndPassword, 
   signOut,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  updateProfile
 } from 'firebase/auth';
 
 interface AuthContextType {
@@ -16,6 +17,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
+  updateUserProfile: (displayName: string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -53,6 +55,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const logout = async (): Promise<void> => {
     await signOut(auth);
   };
+  
+  const updateUserProfile = async (displayName: string): Promise<void> => {
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      await updateProfile(currentUser, { displayName });
+      // Forçar a atualização do estado do usuário na aplicação
+      setUser({ ...currentUser }); 
+    } else {
+      throw new Error("Nenhum usuário logado para atualizar.");
+    }
+  };
 
   const value = {
     user,
@@ -61,6 +74,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     login,
     signInWithGoogle,
     logout,
+    updateUserProfile,
     isLoading,
   };
 

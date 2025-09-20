@@ -193,19 +193,16 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   }, [user, userVotes]);
 
   const resetAllVotes = useCallback(async () => {
-    if (!window.confirm('TEM CERTEZA? Esta ação irá zerar permanentemente TODOS os votos de TODOS os posts e não pode ser desfeita.')) {
+    if (!window.confirm('TEM CERTEZA? Esta ação irá zerar os contadores de votos de TODOS os posts e não pode ser desfeita.')) {
       return;
     }
 
-    console.log("Iniciando a redefinição de todos os votos...");
+    console.log("Iniciando a redefinição dos contadores de votos...");
     try {
       const postsRef = ref(db, 'posts');
       const postsSnapshot = await get(postsRef);
       
       const updates: { [key: string]: any } = {};
-
-      // Marcar toda a árvore de user_votes para exclusão
-      updates['/user_votes'] = null;
 
       // Percorrer todos os posts e zerar os contadores
       if (postsSnapshot.exists()) {
@@ -218,11 +215,11 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         });
       }
 
-      // Executar a atualização atômica
+      // Executar a atualização atômica apenas nos posts
       await update(ref(db), updates);
       
-      alert('Todos os votos foram zerados com sucesso!');
-      console.log("Todos os votos foram redefinidos.");
+      alert('Os contadores de votos de todos os posts foram zerados com sucesso!');
+      console.log("Contadores de votos redefinidos.");
     } catch (error) {
       console.error("Erro ao zerar os votos:", error);
       alert('Ocorreu um erro ao zerar os votos. Verifique o console.');

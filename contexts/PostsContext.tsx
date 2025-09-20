@@ -27,6 +27,8 @@ const populateInitialData = async () => {
         const newPostRef = push(postsRef);
         await set(newPostRef, {
             ...rest,
+            upvotes: 0, // Garantir que o campo exista
+            downvotes: 0, // Garantir que o campo exista
             createdAt: new Date(rest.createdAt).getTime(),
         });
     }
@@ -122,7 +124,9 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     try {
       await remove(ref(db, `posts/${id}`));
       // Also remove associated votes
-      await remove(ref(db, `votes/${id}`));
+      // This part is tricky as it would require iterating all users.
+      // A better approach is handling this via security rules or a cloud function.
+      // For now, we leave the user_votes entries, they will be orphaned but won't affect the app.
       return true;
     } catch (error) {
       console.error("Error deleting post: ", error);
@@ -132,6 +136,7 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   
   const voteOnPost = useCallback(async (postId: string, voteType: 'up' | 'down') => {
     if (!user) {
+      // Idealmente, isso deveria abrir o modal de login
       alert("Você precisa estar logado para votar.");
       return;
     }
@@ -143,14 +148,22 @@ export const PostsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     await runTransaction(postRef, (post) => {
       if (post) {
-        if (currentVote === voteType) { // Undoing vote
-          post[voteType === 'up' ? 'upvotes' : 'downvotes']--;
+        // Garante que os contadores de votos existam e sejam números antes de modificar
+        post.upvotes = post.upvotes || 0;
+        post.downvotes = post.downvotes || 0;
+
+        if (currentVote === voteType) { // Desfazendo o voto
+          if (voteType === 'up') post.upvotes--;
+          else post.downvotes--;
           remove(userVoteRef);
         } else {
-          if (currentVote) { // Switching vote
-            post[currentVote === 'up' ? 'upvotes' : 'downvotes']--;
+          if (currentVote) { // Trocando o voto
+            if (currentVote === 'up') post.upvotes--;
+            else post.downvotes--;
           }
-          post[voteType === 'up' ? 'upvotes' : 'downvotes']++;
+          // Aplicando o novo voto
+          if (voteType === 'up') post.upvotes++;
+          else post.downvotes++;
           set(userVoteRef, voteType);
         }
       }

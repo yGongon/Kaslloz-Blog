@@ -69,15 +69,6 @@ const ProfilePage: React.FC = () => {
     <PageTransition>
       <div className="max-w-4xl mx-auto">
         <header className="flex flex-col sm:flex-row items-center gap-6 mb-12 p-6 bg-brand-gray rounded-lg border border-brand-light-gray/20">
-          <!-- Google tag (gtag.js) -->
-          <script async src="https://www.googletagmanager.com/gtag/js?id=G-1NM1Y28PL0"></script>
-          <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-          
-            gtag('config', 'G-1NM1Y28PL0');
-          </script>
           <img
             src={user.photoURL || `https://ui-avatars.com/api/?name=${displayName}&background=1F2937&color=fff`}
             alt={displayName || 'User Avatar'}

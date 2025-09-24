@@ -80,12 +80,12 @@ const PostDetailPage: React.FC = () => {
             {post.category === Category.Builds && (
                  <div className="hidden sm:flex flex-col items-center space-y-1 pt-16">
                     <button onClick={() => handleVoteClick('up')} aria-label="Upvote" className="group p-2 rounded-full hover:bg-brand-light-gray transition-colors">
-                        <Icon name="arrowUp" className={`w-7 h-7 transition-colors ${userVote?.up ? 'text-brand-red' : 'text-gray-500 group-hover:text-white'}`}/>
+                        <Icon name="arrowUp" className={`w-7 h-7 transition-colors ${userVote === 'up' ? 'text-brand-red' : 'text-gray-500 group-hover:text-white'}`}/>
                     </button>
                     <span className="font-display text-xl font-bold text-gray-200">{post.upvotes || 0}</span>
                     <div className="h-4"></div>
                     <button onClick={() => handleVoteClick('down')} aria-label="Downvote" className="group p-2 rounded-full hover:bg-brand-light-gray transition-colors">
-                        <Icon name="arrowDown" className={`w-7 h-7 transition-colors ${userVote?.down ? 'text-blue-400' : 'text-gray-500 group-hover:text-white'}`}/>
+                        <Icon name="arrowDown" className={`w-7 h-7 transition-colors ${userVote === 'down' ? 'text-blue-400' : 'text-gray-500 group-hover:text-white'}`}/>
                     </button>
                     <span className="font-display text-xl font-bold text-gray-200">{post.downvotes || 0}</span>
                  </div>
@@ -101,13 +101,13 @@ const PostDetailPage: React.FC = () => {
                         <div className="sm:hidden flex items-center space-x-4">
                            <div className="flex items-center space-x-1">
                               <button onClick={() => handleVoteClick('up')} aria-label="Upvote" className="group p-1">
-                                  <Icon name="arrowUp" className={`w-6 h-6 transition-colors ${userVote?.up ? 'text-brand-red' : 'text-gray-500 group-hover:text-white'}`}/>
+                                  <Icon name="arrowUp" className={`w-6 h-6 transition-colors ${userVote === 'up' ? 'text-brand-red' : 'text-gray-500 group-hover:text-white'}`}/>
                               </button>
                               <span className="font-display text-lg font-bold text-gray-200">{post.upvotes || 0}</span>
                            </div>
                            <div className="flex items-center space-x-1">
                               <button onClick={() => handleVoteClick('down')} aria-label="Downvote" className="group p-1">
-                                  <Icon name="arrowDown" className={`w-6 h-6 transition-colors ${userVote?.down ? 'text-blue-400' : 'text-gray-500 group-hover:text-white'}`}/>
+                                  <Icon name="arrowDown" className={`w-6 h-6 transition-colors ${userVote === 'down' ? 'text-blue-400' : 'text-gray-500 group-hover:text-white'}`}/>
                               </button>
                               <span className="font-display text-lg font-bold text-gray-200">{post.downvotes || 0}</span>
                            </div>
@@ -142,7 +142,9 @@ const PostDetailPage: React.FC = () => {
 
                 {post.youtubeId && (
                   <div className="my-8">
-                    <h2 className="font-display text-2xl font-bold text-white mb-4">Build em Ação</h2>
+                    <h2 className="font-display text-2xl font-bold text-white mb-4">
+                      {post.category === Category.Builds ? 'Build em Ação' : 'Guia em Vídeo'}
+                    </h2>
                     <YouTubeEmbed embedId={post.youtubeId} />
                   </div>
                 )}

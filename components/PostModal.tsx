@@ -79,8 +79,9 @@ const PostModal: React.FC<PostModalProps> = ({ postToEdit, onClose }) => {
       postData.youtubeId = extractYouTubeId(youtubeUrl);
     } else if (category === Category.PatchNotes) {
       postData.version = version;
+    } else if (category === Category.OperatorGuides) {
+      postData.youtubeId = extractYouTubeId(youtubeUrl);
     }
-    // A categoria 'OperatorGuides' não precisa de campos extras neste modal
 
     if (postToEdit) {
       // Mantém as contagens de votos originais ao atualizar
@@ -167,22 +168,25 @@ const PostModal: React.FC<PostModalProps> = ({ postToEdit, onClose }) => {
             <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="imageUrl">URL da Imagem</label>
             <input id="imageUrl" type="text" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://picsum.photos/800/450" className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red" required />
           </div>
+          
           {category === Category.Builds && (
-             <>
-                <div>
-                    <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="weaponType">Tipo de Arma</label>
-                    <select id="weaponType" value={weaponType} onChange={(e) => setWeaponType(e.target.value as WeaponType)} className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red">
-                        {Object.values(WeaponType).map(type => (
-                            <option key={type} value={type}>{type}</option>
-                        ))}
-                    </select>
-                </div>
-                <div>
-                    <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="youtubeUrl">URL do Vídeo do YouTube</label>
-                    <input id="youtubeUrl" type="text" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ" className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red" />
-                </div>
-             </>
+             <div>
+                <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="weaponType">Tipo de Arma</label>
+                <select id="weaponType" value={weaponType} onChange={(e) => setWeaponType(e.target.value as WeaponType)} className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red">
+                    {Object.values(WeaponType).map(type => (
+                        <option key={type} value={type}>{type}</option>
+                    ))}
+                </select>
+            </div>
           )}
+
+          {(category === Category.Builds || category === Category.OperatorGuides) && (
+            <div>
+                <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="youtubeUrl">URL do Vídeo do YouTube</label>
+                <input id="youtubeUrl" type="text" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ" className="w-full bg-brand-dark border border-brand-light-gray rounded py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-brand-red" />
+            </div>
+          )}
+
           {category === Category.PatchNotes && (
              <div>
                 <label className="block text-gray-400 text-sm font-bold mb-2" htmlFor="version">Versão</label>
